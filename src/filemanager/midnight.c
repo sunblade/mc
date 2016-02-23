@@ -1577,38 +1577,58 @@ midnight_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void
 
 /* --------------------------------------------------------------------------------------------- */
 
-static int
-midnight_event (Gpm_Event * event, void *data)
+/**
+ * Handle mouse events of file manager screen.
+ *
+ * @param ww Widget object (the file manager)
+ * @param msg mouse event message
+ * @param event mouse event data
+ */
+static void
+midnight_mouse_callback (Widget * ww, mouse_msg_t msg, mouse_event_t * event)
 {
-    Widget *wh = WIDGET (data);
-    int ret = MOU_UNHANDLED;
+    (void) ww;
 
-    if (event->y == wh->y + 1)
+    if (event->y == 0)
     {
         /* menubar */
+
         if (menubar_visible || the_menubar->is_active)
-            ret = WIDGET (the_menubar)->mouse (event, the_menubar);
+            mouse_resend_event (event, WIDGET (the_menubar));
         else
         {
             Widget *w;
 
             w = get_panel_widget (0);
-            if (w->mouse != NULL)
-                ret = w->mouse (event, w);
+            if (w->Mouse.callback != NULL)
+                mouse_resend_event (event, w);
 
-            if (ret == MOU_UNHANDLED)
+            if (event->result.abort)
             {
                 w = get_panel_widget (1);
-                if (w->mouse != NULL)
-                    ret = w->mouse (event, w);
+                if (w->Mouse.callback != NULL)
+                {
+                    event->result.abort = FALSE;
+                    mouse_resend_event (event, w);
+                }
             }
 
-            if (ret == MOU_UNHANDLED)
-                ret = WIDGET (the_menubar)->mouse (event, the_menubar);
+            if (event->result.abort)
+            {
+                event->result.abort = FALSE;
+
+                if (msg == MSG_MOUSE_DOWN && (!menubar_visible || !the_menubar->is_active))
+                    menubar_activate (the_menubar, drop_menus != 0, -1);
+
+                mouse_resend_event (event, WIDGET (the_menubar));
+            }
         }
     }
-
-    return ret;
+    else
+    {
+        /* Continue handling of unhandled event in panel or menu */
+        event->result.abort = TRUE;
+    }
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -1793,8 +1813,9 @@ do_nc (void)
     edit_stack_init ();
 #endif
 
-    midnight_dlg = dlg_create (FALSE, 0, 0, LINES, COLS, dialog_colors, midnight_callback,
-                               midnight_event, "[main]", NULL, DLG_NONE);
+    midnight_dlg = dlg_create (FALSE, 0, 0, LINES, COLS, dialog_colors, midnight_callback, NULL,
+                               "[main]", NULL, DLG_NONE);
+    set_easy_mouse_callback (WIDGET (midnight_dlg), midnight_mouse_callback);
 
     /* Check if we were invoked as an editor or file viewer */
     if (mc_global.mc_run_mode != MC_RUN_FULL)

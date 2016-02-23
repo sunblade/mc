@@ -235,3 +235,37 @@ mouse_process_event (Widget * w, mouse_event_t * event, gboolean click)
 }
 
 /* --------------------------------------------------------------------------------------------- */
+
+/**
+ * Send mouse event directly to widget.
+ *
+ * @param event mouse event. event's coordinates are relative to widget's owner
+ * @param w widget object. w's coordinates are global
+ *
+ * event's coordinates are relative to w->owner
+ * w's coordinates are global
+ */
+void
+mouse_resend_event (mouse_event_t * event, Widget * w)
+{
+    Widget *owner = WIDGET (w->owner);
+    int wy, wx;
+    int ey, ex;
+
+    /* w's coordinates relative to owner */
+    wy = w->y - (owner != NULL ? owner->y : 0);
+    wx = w->x - (owner != NULL ? owner->x : 0);
+    /* save event's coordinates */
+    ey = event->y;
+    ex = event->x;
+    /* event's coordinates relative to w */
+    event->y -= wy;
+    event->x -= wx;
+    /* handle event in w */
+    w->Mouse.callback (w, event->msg, event);
+    /* restore event's coordinates for following handler */
+    event->y = ey;
+    event->x = ex;
+}
+
+/* --------------------------------------------------------------------------------------------- */

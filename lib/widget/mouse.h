@@ -66,6 +66,7 @@ void set_easy_mouse_callback (Widget * w, easy_mouse_callback cb);
 mouse_event_t mouse_translate_event (Widget * w, Gpm_Event * event, gboolean * click);
 /* Process high-level mouse event */
 int mouse_process_event (Widget * w, mouse_event_t * event, gboolean click);
+void mouse_resend_event (mouse_event_t * event, Widget * w);
 
 /*** inline functions ****************************************************************************/
 
