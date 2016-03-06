@@ -1600,13 +1600,13 @@ midnight_mouse_callback (Widget * ww, mouse_msg_t msg, mouse_event_t * event)
             Widget *w;
 
             w = get_panel_widget (0);
-            if (w->Mouse.callback != NULL)
+            if (w->mouse_callback != NULL)
                 mouse_resend_event (event, w);
 
             if (event->result.abort)
             {
                 w = get_panel_widget (1);
-                if (w->Mouse.callback != NULL)
+                if (w->mouse_callback != NULL)
                 {
                     event->result.abort = FALSE;
                     mouse_resend_event (event, w);
@@ -1813,9 +1813,8 @@ do_nc (void)
     edit_stack_init ();
 #endif
 
-    midnight_dlg = dlg_create (FALSE, 0, 0, LINES, COLS, dialog_colors, midnight_callback, NULL,
-                               "[main]", NULL, DLG_NONE);
-    set_easy_mouse_callback (WIDGET (midnight_dlg), midnight_mouse_callback);
+    midnight_dlg = dlg_create (FALSE, 0, 0, LINES, COLS, dialog_colors, midnight_callback,
+                               midnight_mouse_callback, "[main]", NULL, DLG_NONE);
 
     /* Check if we were invoked as an editor or file viewer */
     if (mc_global.mc_run_mode != MC_RUN_FULL)
