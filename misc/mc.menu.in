@@ -75,6 +75,20 @@ shell_patterns=0
         tar cf - "$Pwd" | 7za a -si "$tar.tar.7z" && \
         echo "../$tar.tar.7z created."
 
+5a      Compress the current subdirectory (.7z multipart)
+        Pwd=`basename %d /`
+        Ssize='0'
+        echo -n "Name of the compressed file (without extension) [$Pwd]: "
+        read tar
+        [ "$7zf"x = x ] && 7zf="$Pwd"
+        echo -n "Size of each part in MB ( 0 = disable multipart) [$Ssize]: "
+        read size
+        [ "$size"x = x ] && size="$size"
+        if [ "$size" -gt 0 ]; then compress="-v"$size"m"; else compress=""; fi
+        cd .. && \
+        7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on $compress "$7zf.7z" $Pwd && \
+        echo "../$7zf.7z created."
+
 6       Compress the current subdirectory (tar.xz)
         Pwd=`basename %d /`
         echo -n "Name of the compressed file (without extension) [$Pwd]: "
