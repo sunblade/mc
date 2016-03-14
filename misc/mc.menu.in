@@ -84,6 +84,15 @@ shell_patterns=0
         tar cf - "$Pwd" | xz -f > "$tar.tar.xz" && \
         echo "../$tar.tar.xz created."
 
+7       Compress the current subdirectory (tar.lz4)
+        Pwd=`basename %d /`
+        echo -n "Name of the compressed file (without extension) [$Pwd]: "
+        read tar
+        [ "$tar"x = x ] && tar="$Pwd"
+        cd .. && \
+        tar cf - "$Pwd" | lz4c -f > "$tar.tar.lz4" && \
+        echo "../$tar.tar.lz4 created."
+        
 = f \.c$ & t r
 + f \.c$ & t r & ! t t
 c       Compile and link current .c file
